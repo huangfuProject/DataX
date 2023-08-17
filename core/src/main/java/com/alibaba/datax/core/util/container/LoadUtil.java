@@ -66,10 +66,8 @@ public class LoadUtil {
                 pluginName);
     }
 
-    private static Configuration getPluginConf(PluginType pluginType,
-                                               String pluginName) {
-        Configuration pluginConf = pluginRegisterCenter
-                .getConfiguration(generatePluginKey(pluginType, pluginName));
+    private static Configuration getPluginConf(PluginType pluginType, String pluginName) {
+        Configuration pluginConf = pluginRegisterCenter.getConfiguration(generatePluginKey(pluginType, pluginName));
 
         if (null == pluginConf) {
             throw DataXException.asDataXException(
@@ -115,8 +113,7 @@ public class LoadUtil {
      */
     public static AbstractTaskPlugin loadTaskPlugin(PluginType pluginType,
                                                     String pluginName) {
-        Class<? extends AbstractPlugin> clazz = LoadUtil.loadPluginClass(
-                pluginType, pluginName, ContainerType.Task);
+        Class<? extends AbstractPlugin> clazz = LoadUtil.loadPluginClass(pluginType, pluginName, ContainerType.Task);
 
         try {
             AbstractTaskPlugin taskPlugin = (AbstractTaskPlugin) clazz
@@ -138,8 +135,7 @@ public class LoadUtil {
      * @return
      */
     public static AbstractRunner loadPluginRunner(PluginType pluginType, String pluginName) {
-        AbstractTaskPlugin taskPlugin = LoadUtil.loadTaskPlugin(pluginType,
-                pluginName);
+        AbstractTaskPlugin taskPlugin = LoadUtil.loadTaskPlugin(pluginType, pluginName);
 
         switch (pluginType) {
             case READER:

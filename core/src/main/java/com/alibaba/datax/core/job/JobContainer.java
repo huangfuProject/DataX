@@ -110,8 +110,12 @@ public class JobContainer extends AbstractContainer {
                 this.preHandle();
 
                 LOG.debug("jobContainer starts to do init ...");
+                //这里会进行加载reader和writer的jar，并将reader和writer的入口类实例话保存，同时  加载完对应的类后，回复类加载器为原始的类加载器
+                //单纯的回调init
                 this.init();
                 LOG.info("jobContainer starts to do prepare ...");
+                //这里会发生一个很有意思的事情  就是每次调用回调接口的时候，他都会吧类加载器调整为对应的插件的类加载器，调用完后再切回来
+                //单纯的回调prepare
                 this.prepare();
                 LOG.info("jobContainer starts to do split ...");
                 this.totalStage = this.split();
@@ -390,11 +394,9 @@ public class JobContainer extends AbstractContainer {
             this.needChannelNumber = 1;
         }
 
-        List<Configuration> readerTaskConfigs = this
-                .doReaderSplit(this.needChannelNumber);
+        List<Configuration> readerTaskConfigs = this.doReaderSplit(this.needChannelNumber);
         int taskNumber = readerTaskConfigs.size();
-        List<Configuration> writerTaskConfigs = this
-                .doWriterSplit(taskNumber);
+        List<Configuration> writerTaskConfigs = this.doWriterSplit(taskNumber);
 
         List<Configuration> transformerList = this.configuration.getListConfiguration(CoreConstant.DATAX_JOB_CONTENT_TRANSFORMER);
 
@@ -493,10 +495,8 @@ public class JobContainer extends AbstractContainer {
         /**
          * 这里的全局speed和每个channel的速度设置为B/s
          */
-        int channelsPerTaskGroup = this.configuration.getInt(
-                CoreConstant.DATAX_CORE_CONTAINER_TASKGROUP_CHANNEL, 5);
-        int taskNumber = this.configuration.getList(
-                CoreConstant.DATAX_JOB_CONTENT).size();
+        int channelsPerTaskGroup = this.configuration.getInt(CoreConstant.DATAX_CORE_CONTAINER_TASKGROUP_CHANNEL, 5);
+        int taskNumber = this.configuration.getList(CoreConstant.DATAX_JOB_CONTENT).size();
 
         this.needChannelNumber = Math.min(this.needChannelNumber, taskNumber);
         PerfTrace.getInstance().setChannelNumber(needChannelNumber);
@@ -653,13 +653,11 @@ public class JobContainer extends AbstractContainer {
      */
     private Reader.Job initJobReader(
             JobPluginCollector jobPluginCollector) {
-        this.readerPluginName = this.configuration.getString(
-                CoreConstant.DATAX_JOB_CONTENT_READER_NAME);
-        classLoaderSwapper.setCurrentThreadClassLoader(LoadUtil.getJarLoader(
-                PluginType.READER, this.readerPluginName));
+        //获取插件的名称
+        this.readerPluginName = this.configuration.getString(CoreConstant.DATAX_JOB_CONTENT_READER_NAME);
+        classLoaderSwapper.setCurrentThreadClassLoader(LoadUtil.getJarLoader(PluginType.READER, this.readerPluginName));
 
-        Reader.Job jobReader = (Reader.Job) LoadUtil.loadJobPlugin(
-                PluginType.READER, this.readerPluginName);
+        Reader.Job jobReader = (Reader.Job) LoadUtil.loadJobPlugin(PluginType.READER, this.readerPluginName);
 
         // 设置reader的jobConfig
         jobReader.setPluginJobConf(this.configuration.getConfiguration(
@@ -726,18 +724,16 @@ public class JobContainer extends AbstractContainer {
     }
 
     // TODO: 如果源头就是空数据
+    //adviceNumber 默认为1
     private List<Configuration> doReaderSplit(int adviceNumber) {
-        classLoaderSwapper.setCurrentThreadClassLoader(LoadUtil.getJarLoader(
-                PluginType.READER, this.readerPluginName));
-        List<Configuration> readerSlicesConfigs =
-                this.jobReader.split(adviceNumber);
+        //加载reader的类加载器
+        classLoaderSwapper.setCurrentThreadClassLoader(LoadUtil.getJarLoader(PluginType.READER, this.readerPluginName));
+        List<Configuration> readerSlicesConfigs = this.jobReader.split(adviceNumber);
         if (readerSlicesConfigs == null || readerSlicesConfigs.size() <= 0) {
-            throw DataXException.asDataXException(
-                    FrameworkErrorCode.PLUGIN_SPLIT_ERROR,
-                    "reader切分的task数目不能小于等于0");
+            throw DataXException.asDataXException(FrameworkErrorCode.PLUGIN_SPLIT_ERROR,"reader切分的task数目不能小于等于0");
         }
-        LOG.info("DataX Reader.Job [{}] splits to [{}] tasks.",
-                this.readerPluginName, readerSlicesConfigs.size());
+        LOG.info("DataX Reader.Job [{}] splits to [{}] tasks.", this.readerPluginName, readerSlicesConfigs.size());
+        //恢复类加载器
         classLoaderSwapper.restoreCurrentThreadClassLoader();
         return readerSlicesConfigs;
     }

@@ -423,15 +423,11 @@ public class TaskGroupContainer extends AbstractContainer {
              * 生成readerThread
              */
             readerRunner = (ReaderRunner) generateRunner(PluginType.READER,transformerInfoExecs);
-            this.readerThread = new Thread(readerRunner,
-                    String.format("%d-%d-%d-reader",
-                            jobId, taskGroupId, this.taskId));
+            this.readerThread = new Thread(readerRunner, String.format("%d-%d-%d-reader", jobId, taskGroupId, this.taskId));
             /**
              * 通过设置thread的contextClassLoader，即可实现同步和主程序不通的加载器
              */
-            this.readerThread.setContextClassLoader(LoadUtil.getJarLoader(
-                    PluginType.READER, this.taskConfig.getString(
-                            CoreConstant.JOB_READER_NAME)));
+            this.readerThread.setContextClassLoader(LoadUtil.getJarLoader( PluginType.READER, this.taskConfig.getString( CoreConstant.JOB_READER_NAME)));
         }
 
         public void doStart() {
@@ -467,10 +463,8 @@ public class TaskGroupContainer extends AbstractContainer {
 
             switch (pluginType) {
                 case READER:
-                    newRunner = LoadUtil.loadPluginRunner(pluginType,
-                            this.taskConfig.getString(CoreConstant.JOB_READER_NAME));
-                    newRunner.setJobConf(this.taskConfig.getConfiguration(
-                            CoreConstant.JOB_READER_PARAMETER));
+                    newRunner = LoadUtil.loadPluginRunner(pluginType,this.taskConfig.getString(CoreConstant.JOB_READER_NAME));
+                    newRunner.setJobConf(this.taskConfig.getConfiguration(CoreConstant.JOB_READER_PARAMETER));
 
                     pluginCollector = ClassUtil.instantiate(
                             taskCollectorClass, AbstractTaskPluginCollector.class,
