@@ -25,7 +25,10 @@ public enum DataBaseType {
     Oscar("oscar", "com.oscar.Driver"),
     OceanBase("oceanbase", "com.alipay.oceanbase.jdbc.Driver"),
     StarRocks("starrocks", "com.mysql.jdbc.Driver"),
-    Databend("databend", "com.databend.jdbc.DatabendDriver");
+    Sybase("sybase", "com.sybase.jdbc4.jdbc.SybDriver"),
+    GaussDB("gaussdb", "org.opengauss.Driver"),
+    Databend("databend", "com.databend.jdbc.DatabendDriver"),
+    Doris("doris","com.mysql.jdbc.Driver");
 
     private String typeName;
     private String driverClassName;
@@ -70,6 +73,10 @@ public enum DataBaseType {
             case Oscar:
                 break;
             case StarRocks:
+                break;
+            case GaussDB:
+                break;
+            case Doris:
                 break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type.");
@@ -132,6 +139,10 @@ public enum DataBaseType {
                     result = jdbc + "?" + suffix;
                 }
                 break;
+            case Sybase:
+                break;
+            case GaussDB:
+                break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type.");
         }
@@ -159,6 +170,8 @@ public enum DataBaseType {
             case KingbaseES:
             case Oscar:
                 break;
+            case GaussDB:
+                break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type.");
         }
@@ -183,6 +196,8 @@ public enum DataBaseType {
             case PostgreSQL:
             case KingbaseES:
             case Oscar:
+                break;
+            case GaussDB:
                 break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type");
@@ -209,6 +224,8 @@ public enum DataBaseType {
             case KingbaseES:
                 break;
             case Oscar:
+                break;
+            case GaussDB:
                 break;
             default:
                 throw DataXException.asDataXException(DBUtilErrorCode.UNSUPPORTED_TYPE, "unsupported database type");
